@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import api from '../api/axiosInstance';
+import { useToast } from '../context/ToastContext';
 import { Folder, Plus, X, Edit2 } from 'lucide-react';
 
 const Projects = () => {
     const navigate = useNavigate();
     const { selectedOrg } = useOutletContext();
+    const { showToast } = useToast();
     const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // loading managed globally
     const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentProjectId, setCurrentProjectId] = useState(null);
@@ -40,16 +42,13 @@ const Projects = () => {
 
     const fetchProjects = async (orgId) => {
         try {
-            setLoading(true);
             const token = localStorage.getItem('token');
             const res = await api.get(`/api/projects?orgId=${orgId}`, {
                 headers: { 'x-auth-token': token }
             });
             setProjects(res.data);
-            setLoading(false);
         } catch (err) {
             console.error(err);
-            setLoading(false);
         }
     };
 
@@ -63,7 +62,7 @@ const Projects = () => {
                 }, {
                     headers: { 'x-auth-token': token }
                 });
-                alert('Project updated successfully!');
+                showToast('Project updated successfully!', 'success');
             } else {
                 await api.post('/api/projects', {
                     ...newProjectData,
@@ -71,14 +70,14 @@ const Projects = () => {
                 }, {
                     headers: { 'x-auth-token': token }
                 });
-                alert('Project created successfully!');
+                showToast('Project created successfully!', 'success');
             }
 
             closeModal();
             fetchProjects(selectedOrg._id);
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Failed to save project');
+            // Error toast handled by interceptor
         }
     };
 
@@ -107,7 +106,9 @@ const Projects = () => {
         });
     };
 
-    if (loading) return <div className="text-center py-10">Loading projects...</div>;
+
+
+    // if (loading) return <div className="text-center py-10">Loading projects...</div>;
 
     return (
         <div>

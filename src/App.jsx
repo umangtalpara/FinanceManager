@@ -1,5 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastProvider } from './context/ToastContext';
+import { LoaderProvider } from './context/LoaderContext';
+import Toast from './components/Toast';
+import Loader from './components/Loader';
+import AxiosInterceptor from './components/AxiosInterceptor';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardLayout from './pages/DashboardLayout';
@@ -20,32 +25,39 @@ const PrivateRoute = ({ children }) => {
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+      <LoaderProvider>
+        <ToastProvider>
+          <AxiosInterceptor />
+          <Loader />
+          <Toast />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Protected Routes with Layout */}
-        <Route
-          element={
-            <PrivateRoute>
-              <DashboardLayout />
-            </PrivateRoute>
-          }
-        >
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/project/:id" element={<ProjectDetails />} />
-        </Route>
+            {/* Protected Routes with Layout */}
+            <Route
+              element={
+                <PrivateRoute>
+                  <DashboardLayout />
+                </PrivateRoute>
+              }
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/project/:id" element={<ProjectDetails />} />
+            </Route>
 
-        {/* Default Redirect */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-      </Routes>
+            {/* Default Redirect */}
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </ToastProvider>
+      </LoaderProvider>
     </Router>
   );
 }

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../api/axiosInstance';
+import { useToast } from '../context/ToastContext';
 import { User, Bell, Shield, CreditCard, Tag, Plus, Trash2 } from 'lucide-react';
 
 const Settings = () => {
     const { selectedOrg } = useOutletContext();
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState({ name: '', type: 'Expense' });
-    const [loading, setLoading] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (selectedOrg) {
@@ -39,6 +40,7 @@ const Settings = () => {
             });
             setNewCategory({ name: '', type: 'Expense' });
             fetchCategories();
+            showToast('Category added successfully', 'success');
         } catch (err) {
             console.error(err);
         }
@@ -52,6 +54,7 @@ const Settings = () => {
                 headers: { 'x-auth-token': token }
             });
             fetchCategories();
+            showToast('Category deleted successfully', 'success');
         } catch (err) {
             console.error(err);
         }

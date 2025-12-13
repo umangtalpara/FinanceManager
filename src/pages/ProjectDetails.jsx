@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 
 import api from '../api/axiosInstance';
+import { useToast } from '../context/ToastContext';
 import { ArrowLeft, Plus, DollarSign, Trash2, Edit2, X, CheckCircle } from 'lucide-react';
 
 const ProjectDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { selectedOrg, user } = useOutletContext(); // Get user from context
+    const { showToast } = useToast();
     const [project, setProject] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -94,10 +96,10 @@ const ProjectDetails = () => {
 
             resetForm();
             fetchTransactions();
+            showToast(editingTransaction ? 'Transaction updated' : 'Transaction created', 'success');
         } catch (err) {
             console.error('Submit error:', err);
-            console.error('Response data:', err.response?.data);
-            alert('Operation failed: ' + (err.response?.data?.message || err.message));
+            // Error toast handled strictly by interceptor
         }
     };
 
@@ -109,9 +111,10 @@ const ProjectDetails = () => {
                 headers: { 'x-auth-token': token }
             });
             fetchTransactions();
+            showToast('Transaction deleted', 'success');
         } catch (err) {
             console.error(err);
-            alert('Delete failed.');
+            // Error managed by interceptor
         }
     };
 
@@ -123,9 +126,10 @@ const ProjectDetails = () => {
                 headers: { 'x-auth-token': token }
             });
             fetchTransactions();
+            showToast('Transaction settled', 'success');
         } catch (err) {
             console.error(err);
-            alert('Settlement failed. Only Admins can settle.');
+            // Error managed by interceptor
         }
     };
 
@@ -153,9 +157,10 @@ const ProjectDetails = () => {
                 headers: { 'x-auth-token': token }
             });
             fetchTransactions();
+            showToast(`Transaction ${status}`, 'success');
         } catch (err) {
             console.error(err);
-            alert('Failed to update status.');
+            // Error managed by interceptor
         }
     };
 

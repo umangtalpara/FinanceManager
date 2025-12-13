@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../api/axiosInstance';
+import { useToast } from '../context/ToastContext';
 import { Lock, Plus, UserPlus, X } from 'lucide-react';
 import AdminChangePasswordModal from '../components/AdminChangePasswordModal';
 
 const Team = () => {
     const { selectedOrg, user } = useOutletContext();
     const [members, setMembers] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // loading managed globally
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const { showToast } = useToast();
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
 
@@ -28,16 +30,13 @@ const Team = () => {
 
     const fetchMembers = async (orgId) => {
         try {
-            setLoading(true);
             const token = localStorage.getItem('token');
             const res = await api.get(`/api/orgs/${orgId}/members`, {
                 headers: { 'x-auth-token': token }
             });
             setMembers(res.data);
-            setLoading(false);
         } catch (err) {
             console.error(err);
-            setLoading(false);
         }
     };
 
@@ -59,14 +58,14 @@ const Team = () => {
             setIsAddMemberModalOpen(false);
             setNewMemberData({ email: '', fullName: '', password: '', role: 'Employee' });
             fetchMembers(selectedOrg._id);
-            alert('Member added successfully!');
+            showToast('Member added successfully!', 'success');
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Failed to add member');
+            // Error handled by interceptor, but we can verify here if needed
         }
     };
 
-    if (loading) return <div className="text-center py-10">Loading team members...</div>;
+    // if (loading) return <div className="text-center py-10">Loading team members...</div>;
 
     return (
         <div>
