@@ -42,13 +42,15 @@ const ProjectDetails = () => {
 
     const fetchTransactions = async () => {
         try {
+            console.log('Fetching transactions for project:', id);
             const token = localStorage.getItem('token');
             const res = await axios.get(`http://localhost:5000/api/transactions?projectId=${id}`, {
                 headers: { 'x-auth-token': token }
             });
+            console.log('Fetched transactions:', res.data);
             setTransactions(res.data);
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching transactions:', err);
         }
     };
 
@@ -64,30 +66,37 @@ const ProjectDetails = () => {
         }
     };
 
+    console.log('ProjectDetails rendered. User:', user, 'Org:', selectedOrg);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('Submitting transaction...', formData);
         try {
             const token = localStorage.getItem('token');
+            let res;
             if (editingTransaction) {
-                await axios.put(`http://localhost:5000/api/transactions/${editingTransaction._id}`, {
+                res = await axios.put(`http://localhost:5000/api/transactions/${editingTransaction._id}`, {
                     ...formData
                 }, {
                     headers: { 'x-auth-token': token }
                 });
             } else {
-                await axios.post('http://localhost:5000/api/transactions', {
+                console.log('Sending POST to create transaction with projectId:', id);
+                res = await axios.post('http://localhost:5000/api/transactions', {
                     ...formData,
                     projectId: id
                 }, {
                     headers: { 'x-auth-token': token }
                 });
             }
+            console.log('Transaction submit response:', res.data);
 
             resetForm();
             fetchTransactions();
         } catch (err) {
-            console.error(err);
-            alert('Operation failed.');
+            console.error('Submit error:', err);
+            console.error('Response data:', err.response?.data);
+            alert('Operation failed: ' + (err.response?.data?.message || err.message));
         }
     };
 
