@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { User, Bell, Shield, CreditCard, Tag, Plus, Trash2 } from 'lucide-react';
 
 const Settings = () => {
@@ -18,7 +18,7 @@ const Settings = () => {
     const fetchCategories = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/categories?orgId=${selectedOrg._id}`, {
+            const res = await api.get(`/api/categories?orgId=${selectedOrg._id}`, {
                 headers: { 'x-auth-token': token }
             });
             setCategories(res.data);
@@ -31,7 +31,7 @@ const Settings = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/categories', {
+            await api.post('/api/categories', {
                 ...newCategory,
                 orgId: selectedOrg._id
             }, {
@@ -48,7 +48,7 @@ const Settings = () => {
         if (!window.confirm('Delete this category?')) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/categories/${id}`, {
+            await api.delete(`/api/categories/${id}`, {
                 headers: { 'x-auth-token': token }
             });
             fetchCategories();

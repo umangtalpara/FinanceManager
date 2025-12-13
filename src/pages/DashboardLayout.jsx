@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import Layout from '../components/Layout';
 
 const DashboardLayout = () => {
@@ -26,7 +26,7 @@ const DashboardLayout = () => {
                 navigate('/login');
                 return;
             }
-            const res = await axios.get('http://localhost:5000/api/orgs', {
+            const res = await api.get('/api/orgs', {
                 headers: { 'x-auth-token': token }
             });
             setOrgs(res.data);

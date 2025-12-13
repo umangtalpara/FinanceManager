@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { PieChart, BarChart, Activity, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 
 const Reports = () => {
@@ -23,7 +23,7 @@ const Reports = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/reports/stats?orgId=${orgId}`, {
+            const res = await api.get(`/api/reports/stats?orgId=${orgId}`, {
                 headers: { 'x-auth-token': token }
             });
             setStats(res.data);

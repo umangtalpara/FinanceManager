@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
-import axios from 'axios';
+
+import api from '../api/axiosInstance';
 import { ArrowLeft, Plus, DollarSign, Trash2, Edit2, X, CheckCircle } from 'lucide-react';
 
 const ProjectDetails = () => {
@@ -31,7 +32,7 @@ const ProjectDetails = () => {
     const fetchProject = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/projects/${id}`, {
+            const res = await api.get(`/api/projects/${id}`, {
                 headers: { 'x-auth-token': token }
             });
             setProject(res.data);
@@ -44,7 +45,7 @@ const ProjectDetails = () => {
         try {
             console.log('Fetching transactions for project:', id);
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/transactions?projectId=${id}`, {
+            const res = await api.get(`/api/transactions?projectId=${id}`, {
                 headers: { 'x-auth-token': token }
             });
             console.log('Fetched transactions:', res.data);
@@ -57,7 +58,7 @@ const ProjectDetails = () => {
     const fetchCategories = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/categories?orgId=${selectedOrg._id}`, {
+            const res = await api.get(`/api/categories?orgId=${selectedOrg._id}`, {
                 headers: { 'x-auth-token': token }
             });
             setCategories(res.data);
@@ -75,14 +76,14 @@ const ProjectDetails = () => {
             const token = localStorage.getItem('token');
             let res;
             if (editingTransaction) {
-                res = await axios.put(`http://localhost:5000/api/transactions/${editingTransaction._id}`, {
+                res = await api.put(`/api/transactions/${editingTransaction._id}`, {
                     ...formData
                 }, {
                     headers: { 'x-auth-token': token }
                 });
             } else {
                 console.log('Sending POST to create transaction with projectId:', id);
-                res = await axios.post('http://localhost:5000/api/transactions', {
+                res = await api.post('/api/transactions', {
                     ...formData,
                     projectId: id
                 }, {
@@ -104,7 +105,7 @@ const ProjectDetails = () => {
         if (!window.confirm('Are you sure you want to delete this transaction?')) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/transactions/${transactionId}`, {
+            await api.delete(`/api/transactions/${transactionId}`, {
                 headers: { 'x-auth-token': token }
             });
             fetchTransactions();
@@ -118,7 +119,7 @@ const ProjectDetails = () => {
         if (!window.confirm('Mark this transaction as Settled?')) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/transactions/${transactionId}/settle`, {}, {
+            await api.put(`/api/transactions/${transactionId}/settle`, {}, {
                 headers: { 'x-auth-token': token }
             });
             fetchTransactions();
@@ -148,7 +149,7 @@ const ProjectDetails = () => {
     const handleStatusUpdate = async (transactionId, status) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/approvals/${transactionId}/status`, { status }, {
+            await api.put(`/api/approvals/${transactionId}/status`, { status }, {
                 headers: { 'x-auth-token': token }
             });
             fetchTransactions();

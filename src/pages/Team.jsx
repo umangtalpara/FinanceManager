@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { Lock, Plus, UserPlus, X } from 'lucide-react';
 import AdminChangePasswordModal from '../components/AdminChangePasswordModal';
 
@@ -30,7 +30,7 @@ const Team = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/orgs/${orgId}/members`, {
+            const res = await api.get(`/api/orgs/${orgId}/members`, {
                 headers: { 'x-auth-token': token }
             });
             setMembers(res.data);
@@ -53,7 +53,7 @@ const Team = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:5000/api/orgs/${selectedOrg._id}/members`, newMemberData, {
+            await api.post(`/api/orgs/${selectedOrg._id}/members`, newMemberData, {
                 headers: { 'x-auth-token': token }
             });
             setIsAddMemberModalOpen(false);

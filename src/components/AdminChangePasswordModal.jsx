@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 
 const AdminChangePasswordModal = ({ isOpen, onClose, userId, orgId, userName }) => {
     const [newPassword, setNewPassword] = useState('');
@@ -12,7 +12,7 @@ const AdminChangePasswordModal = ({ isOpen, onClose, userId, orgId, userName }) 
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/users/admin/change-password',
+            await api.post('/api/users/admin/change-password',
                 { userId, orgId, newPassword },
                 { headers: { 'x-auth-token': token } }
             );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 import { Folder, Plus, X, Edit2 } from 'lucide-react';
 
 const Projects = () => {
@@ -29,7 +29,7 @@ const Projects = () => {
     const fetchOrgMembers = async (orgId) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/orgs/${orgId}/members`, {
+            const res = await api.get(`/api/orgs/${orgId}/members`, {
                 headers: { 'x-auth-token': token }
             });
             setOrgMembers(res.data);
@@ -42,7 +42,7 @@ const Projects = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/projects?orgId=${orgId}`, {
+            const res = await api.get(`/api/projects?orgId=${orgId}`, {
                 headers: { 'x-auth-token': token }
             });
             setProjects(res.data);
@@ -58,14 +58,14 @@ const Projects = () => {
         try {
             const token = localStorage.getItem('token');
             if (isEditing) {
-                await axios.put(`http://localhost:5000/api/projects/${currentProjectId}`, {
+                await api.put(`/api/projects/${currentProjectId}`, {
                     ...newProjectData
                 }, {
                     headers: { 'x-auth-token': token }
                 });
                 alert('Project updated successfully!');
             } else {
-                await axios.post('http://localhost:5000/api/projects', {
+                await api.post('/api/projects', {
                     ...newProjectData,
                     orgId: selectedOrg._id
                 }, {

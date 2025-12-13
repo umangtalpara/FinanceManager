@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axiosInstance';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ const ForgotPassword = () => {
     const onSubmit = async e => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            await api.post('/api/auth/forgot-password', { email });
             setMessage('OTP sent to your email');
             setError('');
         } catch (err) {
