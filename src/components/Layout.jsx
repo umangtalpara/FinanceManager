@@ -6,7 +6,7 @@ const Layout = ({ children, user, orgs, selectedOrg, setSelectedOrg, handleLogou
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const navigation = [
+    const allNavigation = [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Projects', href: '/projects', icon: Folder },
         { name: 'Team', href: '/team', icon: Users },
@@ -14,8 +14,12 @@ const Layout = ({ children, user, orgs, selectedOrg, setSelectedOrg, handleLogou
         { name: 'Settings', href: '/settings', icon: Settings },
     ];
 
+    const navigation = selectedOrg?.currentUserRole === 'Admin'
+        ? allNavigation
+        : allNavigation.filter(item => ['Projects'].includes(item.name));
+
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="h-screen bg-gray-50 flex overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
@@ -44,18 +48,9 @@ const Layout = ({ children, user, orgs, selectedOrg, setSelectedOrg, handleLogou
                     {/* Org Switcher */}
                     <div className="p-4 border-b border-gray-200">
                         <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Organization</label>
-                        <select
-                            className="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md bg-gray-50"
-                            value={selectedOrg?._id || ''}
-                            onChange={(e) => {
-                                const org = orgs.find(o => o._id === e.target.value);
-                                setSelectedOrg(org);
-                            }}
-                        >
-                            {orgs.map(org => (
-                                <option key={org._id} value={org._id}>{org.name}</option>
-                            ))}
-                        </select>
+                        <div className="font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
+                            {selectedOrg?.name || 'My Organization'}
+                        </div>
                     </div>
 
                     {/* Navigation */}
@@ -67,8 +62,8 @@ const Layout = ({ children, user, orgs, selectedOrg, setSelectedOrg, handleLogou
                                     key={item.name}
                                     to={item.href}
                                     className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 ${isActive
-                                            ? 'bg-indigo-50 text-indigo-600'
-                                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                                        ? 'bg-indigo-50 text-indigo-600'
+                                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                     onClick={() => setIsSidebarOpen(false)}
                                 >

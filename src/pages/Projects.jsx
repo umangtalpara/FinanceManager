@@ -18,7 +18,8 @@ const Projects = () => {
         name: '',
         totalBudget: '',
         approvalRequired: false,
-        projectLeadId: ''
+        projectLeadId: '',
+        assignedMembers: []
     });
 
     useEffect(() => {
@@ -89,7 +90,8 @@ const Projects = () => {
             name: project.name,
             totalBudget: project.totalBudget,
             approvalRequired: project.approvalRequired,
-            projectLeadId: project.projectLeadId?._id || ''
+            projectLeadId: project.projectLeadId?._id || '',
+            assignedMembers: project.assignedMembers?.map(m => m._id) || []
         });
         setIsAddProjectModalOpen(true);
     };
@@ -102,7 +104,8 @@ const Projects = () => {
             name: '',
             totalBudget: '',
             approvalRequired: false,
-            projectLeadId: ''
+            projectLeadId: '',
+            assignedMembers: []
         });
     };
 
@@ -119,15 +122,17 @@ const Projects = () => {
                     </h2>
                     <p className="mt-1 text-xs sm:text-sm text-gray-500">Manage your organization's projects and budgets.</p>
                 </div>
-                <button
-                    type="button"
-                    onClick={() => setIsAddProjectModalOpen(true)}
-                    className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 border border-transparent rounded-full shadow-md text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 whitespace-nowrap"
-                >
-                    <Plus className="-ml-1 mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                    <span className="hidden sm:inline">New Project</span>
-                    <span className="sm:hidden">New</span>
-                </button>
+                {selectedOrg?.currentUserRole === 'Admin' && (
+                    <button
+                        type="button"
+                        onClick={() => setIsAddProjectModalOpen(true)}
+                        className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 border border-transparent rounded-full shadow-md text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105 whitespace-nowrap"
+                    >
+                        <Plus className="-ml-1 mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                        <span className="hidden sm:inline">New Project</span>
+                        <span className="sm:hidden">New</span>
+                    </button>
+                )}
             </div>
 
             {/* Add Project Modal */}
@@ -190,6 +195,37 @@ const Projects = () => {
                                                 ))}
                                             </select>
                                         </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Assign Members</label>
+                                            <div className="border border-gray-300 rounded-md max-h-48 overflow-y-auto p-2 space-y-2 bg-gray-50">
+                                                {orgMembers.length === 0 ? (
+                                                    <p className="text-sm text-gray-500 text-center py-2">No members found</p>
+                                                ) : orgMembers.map(member => (
+                                                    <div key={member._id} className="flex items-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`member-${member._id}`}
+                                                            value={member._id}
+                                                            checked={newProjectData.assignedMembers.includes(member._id)}
+                                                            onChange={(e) => {
+                                                                const memberId = e.target.value;
+                                                                const isChecked = e.target.checked;
+                                                                setNewProjectData(prev => ({
+                                                                    ...prev,
+                                                                    assignedMembers: isChecked
+                                                                        ? [...prev.assignedMembers, memberId]
+                                                                        : prev.assignedMembers.filter(id => id !== memberId)
+                                                                }));
+                                                            }}
+                                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                        />
+                                                        <label htmlFor={`member-${member._id}`} className="ml-2 block text-sm text-gray-900 cursor-pointer select-none">
+                                                            {member.userId?.fullName || 'Unknown User'} <span className="text-gray-500 text-xs">({member.role})</span>
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                         <div className="flex items-center">
                                             <input
                                                 id="approval-required"
@@ -232,14 +268,16 @@ const Projects = () => {
                                 </div>
                                 <span className="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
                             </div>
-                            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                <button
-                                    onClick={(e) => openEditModal(e, project)}
-                                    className="p-2 bg-gray-100 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors"
-                                >
-                                    <Edit2 className="h-4 w-4" />
-                                </button>
-                            </div>
+                            {selectedOrg?.currentUserRole === 'Admin' && (
+                                <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <button
+                                        onClick={(e) => openEditModal(e, project)}
+                                        className="p-2 bg-gray-100 rounded-full hover:bg-indigo-100 hover:text-indigo-600 transition-colors"
+                                    >
+                                        <Edit2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            )}
                             <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-200">
                                 {project.name}
                             </h3>
@@ -272,13 +310,19 @@ const Projects = () => {
                             <Folder className="h-10 w-10 text-gray-400" />
                         </div>
                         <h3 className="mt-2 text-lg font-medium text-gray-900">No projects found</h3>
-                        <p className="mt-1 text-sm text-gray-500">Get started by creating a new project for your organization.</p>
-                        <button
-                            onClick={() => setIsAddProjectModalOpen(true)}
-                            className="mt-6 text-indigo-600 font-medium hover:text-indigo-500"
-                        >
-                            Create your first project
-                        </button>
+                        <p className="mt-1 text-sm text-gray-500">
+                            {selectedOrg?.currentUserRole === 'Admin'
+                                ? "Get started by creating a new project for your organization."
+                                : "No projects found for you."}
+                        </p>
+                        {selectedOrg?.currentUserRole === 'Admin' && (
+                            <button
+                                onClick={() => setIsAddProjectModalOpen(true)}
+                                className="mt-6 text-indigo-600 font-medium hover:text-indigo-500"
+                            >
+                                Create your first project
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

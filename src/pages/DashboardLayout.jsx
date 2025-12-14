@@ -19,6 +19,15 @@ const DashboardLayout = () => {
         fetchOrgs();
     }, [user, navigate]);
 
+    useEffect(() => {
+        if (!loading && selectedOrg && selectedOrg.currentUserRole !== 'Admin') {
+            const isAllowed = location.pathname === '/projects' || location.pathname.startsWith('/project/');
+            if (!isAllowed) {
+                navigate('/projects');
+            }
+        }
+    }, [loading, selectedOrg, location.pathname, navigate]);
+
     const fetchOrgs = async () => {
         try {
             const token = localStorage.getItem('token');
