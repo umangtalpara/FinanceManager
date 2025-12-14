@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import api from '../api/axiosInstance';
 import { useToast } from '../context/ToastContext';
-import { Lock, Plus, UserPlus, X } from 'lucide-react';
+import { Lock, Plus, UserPlus, X, Pencil } from 'lucide-react';
 import AdminChangePasswordModal from '../components/AdminChangePasswordModal';
 
 const Team = () => {
@@ -165,7 +165,7 @@ const Team = () => {
                                                     className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-200"
                                                     title="Edit Role"
                                                 >
-                                                    <UserPlus className="h-5 w-5" />
+                                                    <Pencil className="h-5 w-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => openPasswordModal(member)}
