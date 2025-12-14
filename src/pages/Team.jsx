@@ -13,6 +13,13 @@ const Team = () => {
     const { showToast } = useToast();
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editData, setEditData] = useState({
+        role: '',
+        email: '',
+        fullName: '',
+        password: ''
+    });
 
     // Add Member Form State
     const [newMemberData, setNewMemberData] = useState({
@@ -65,6 +72,47 @@ const Team = () => {
         }
     };
 
+    const handleUpdateMember = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            await api.put(`/api/orgs/${selectedOrg._id}/members/${selectedMember._id}`, editData, {
+                headers: { 'x-auth-token': token }
+            });
+            setIsEditModalOpen(false);
+            fetchMembers(selectedOrg._id);
+            showToast('Member updated successfully!', 'success');
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleRemoveMember = async () => {
+        if (!window.confirm('Are you sure you want to remove this member?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            await api.delete(`/api/orgs/${selectedOrg._id}/members/${selectedMember._id}`, {
+                headers: { 'x-auth-token': token }
+            });
+            setIsEditModalOpen(false);
+            fetchMembers(selectedOrg._id);
+            showToast('Member removed successfully!', 'success');
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const openEditModal = (member) => {
+        setSelectedMember(member);
+        setEditData({
+            role: member.role,
+            email: member.userId.email,
+            fullName: member.userId.fullName,
+            password: '' // empty by default
+        });
+        setIsEditModalOpen(true);
+    };
+
     // if (loading) return <div className="text-center py-10">Loading team members...</div>;
 
     return (
@@ -111,13 +159,22 @@ const Team = () => {
                                             {member.role}
                                         </span>
                                         {isAdmin && (
-                                            <button
-                                                onClick={() => openPasswordModal(member)}
-                                                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-200"
-                                                title="Change Password"
-                                            >
-                                                <Lock className="h-5 w-5" />
-                                            </button>
+                                            <>
+                                                <button
+                                                    onClick={() => openEditModal(member)}
+                                                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-200"
+                                                    title="Edit Role"
+                                                >
+                                                    <UserPlus className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => openPasswordModal(member)}
+                                                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all duration-200"
+                                                    title="Change Password"
+                                                >
+                                                    <Lock className="h-5 w-5" />
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -193,6 +250,92 @@ const Team = () => {
                                             className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                                         >
                                             Add Member
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Member Modal */}
+            {isEditModalOpen && selectedMember && (
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={() => setIsEditModalOpen(false)}>
+                            <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+                        </div>
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full relative z-10">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg leading-6 font-medium text-gray-900">Edit Member</h3>
+                                    <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-500">
+                                        <X className="h-6 w-6" />
+                                    </button>
+                                </div>
+                                <div className="mb-4">
+                                    <p className="text-sm text-gray-500">Managing access for <strong>{selectedMember.userId.fullName}</strong></p>
+                                </div>
+                                <form onSubmit={handleUpdateMember}>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Email</label>
+                                            <input
+                                                type="email"
+                                                required
+                                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                value={editData.email}
+                                                onChange={e => setEditData({ ...editData, email: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                value={editData.fullName}
+                                                onChange={e => setEditData({ ...editData, fullName: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">New Password (leave blank to keep current)</label>
+                                            <input
+                                                type="text"
+                                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                value={editData.password}
+                                                onChange={e => setEditData({ ...editData, password: e.target.value })}
+                                                placeholder="Enter new password to change"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Role</label>
+                                            <select
+                                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                value={editData.role}
+                                                onChange={e => setEditData({ ...editData, role: e.target.value })}
+                                            >
+                                                <option value="Employee">Employee</option>
+                                                <option value="Lead">Project Lead</option>
+                                                <option value="Admin">Admin</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="mt-5 sm:mt-6 flex gap-3">
+                                        <button
+                                            type="submit"
+                                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                                        >
+                                            Update Role
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveMember}
+                                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
+                                        >
+                                            Remove Member
                                         </button>
                                     </div>
                                 </form>

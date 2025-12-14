@@ -304,22 +304,26 @@ const ProjectDetails = () => {
                                         <div className="flex items-center gap-2 sm:gap-2">
                                             {/* Approval Actions */}
                                             {transaction.status === 'Pending' && (
-                                                <div className="flex gap-2 sm:gap-2 mr-2 sm:mr-4 border-r border-gray-200 pr-2 sm:pr-4">
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(transaction._id, 'Approved')}
-                                                        className="text-xs sm:text-xs text-green-600 hover:text-green-900 font-medium bg-green-50 hover:bg-green-100 px-2 sm:px-2 py-1 sm:py-1 rounded transition-colors"
-                                                    >
-                                                        <span className="hidden sm:inline">Approve</span>
-                                                        <span className="sm:hidden">✓</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleStatusUpdate(transaction._id, 'Rejected')}
-                                                        className="text-xs sm:text-xs text-red-600 hover:text-red-900 font-medium bg-red-50 hover:bg-red-100 px-2 sm:px-2 py-1 sm:py-1 rounded transition-colors"
-                                                    >
-                                                        <span className="hidden sm:inline">Reject</span>
-                                                        <span className="sm:hidden">✗</span>
-                                                    </button>
-                                                </div>
+                                                (selectedOrg?.currentUserRole === 'Admin' ||
+                                                    selectedOrg?.currentUserRole === 'Lead' ||
+                                                    (project?.projectLeadId?.userId === user?._id || project?.projectLeadId === user?._id)) && (
+                                                    <div className="flex gap-2 sm:gap-2 mr-2 sm:mr-4 border-r border-gray-200 pr-2 sm:pr-4">
+                                                        <button
+                                                            onClick={() => handleStatusUpdate(transaction._id, 'Approved')}
+                                                            className="text-xs sm:text-xs text-green-600 hover:text-green-900 font-medium bg-green-50 hover:bg-green-100 px-2 sm:px-2 py-1 sm:py-1 rounded transition-colors"
+                                                        >
+                                                            <span className="hidden sm:inline">Approve</span>
+                                                            <span className="sm:hidden">✓</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleStatusUpdate(transaction._id, 'Rejected')}
+                                                            className="text-xs sm:text-xs text-red-600 hover:text-red-900 font-medium bg-red-50 hover:bg-red-100 px-2 sm:px-2 py-1 sm:py-1 rounded transition-colors"
+                                                        >
+                                                            <span className="hidden sm:inline">Reject</span>
+                                                            <span className="sm:hidden">✗</span>
+                                                        </button>
+                                                    </div>
+                                                )
                                             )}
 
                                             {/* Settlement Action */}
